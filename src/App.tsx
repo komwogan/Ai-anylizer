@@ -128,12 +128,39 @@ export default function App() {
     return `${h}:${m}:${s}`;
   };
 
+  const toggleMenu = () => {
+    const nextState = !isMenuOpen;
+    setIsMenuOpen(nextState);
+    if (nextState) {
+      window.history.pushState({ page: activePage, menu: true }, '', '#menu');
+    } else if (window.history.state?.menu) {
+      window.history.back();
+    }
+  };
+
   const handleAnalysis = async () => {
     setShowAnalysisModal(true);
     setAnalysisLoading(true);
-    const result = await getPredictions("I want analysis for today's upcoming football matches.");
+    window.history.pushState({ page: activePage, modal: 'analysis' }, '', '#analysis');
+    
+    const today = new Date().toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+    
+    const result = await getPredictions(`I want analysis for today's (${today}) upcoming football matches.`);
     setAnalysisResult(result);
     setAnalysisLoading(false);
+  };
+
+  const closeModal = () => {
+    if (window.history.state?.modal === 'analysis') {
+      window.history.back();
+    } else {
+      setShowAnalysisModal(false);
+      setAnalysisResult(null);
+    }
   };
 
   const [activePage, setActivePage] = useState('home');
@@ -143,11 +170,31 @@ export default function App() {
 
   useEffect(() => {
     // Initial history state
-    window.history.replaceState({ page: 'home' }, '', '');
+    if (!window.history.state) {
+      window.history.replaceState({ page: 'home' }, '', '');
+    }
 
     const handlePopState = (event: PopStateEvent) => {
-      if (event.state && event.state.page) {
-        setActivePage(event.state.page);
+      const state = event.state;
+      
+      // Handle Modal
+      if (state?.modal === 'analysis') {
+        setShowAnalysisModal(true);
+      } else {
+        setShowAnalysisModal(false);
+        setAnalysisResult(null);
+      }
+
+      // Handle Mobile Menu
+      if (state?.menu) {
+        setIsMenuOpen(true);
+      } else {
+        setIsMenuOpen(false);
+      }
+
+      // Handle Page
+      if (state?.page) {
+        setActivePage(state.page);
       } else {
         setActivePage('home');
       }
@@ -199,7 +246,7 @@ export default function App() {
         "fixed top-0 left-0 w-full z-50 transition-all duration-500 py-4 px-6 md:px-12 flex items-center justify-between",
         scrolled ? "bg-navy-dark/95 backdrop-blur-md shadow-lg border-b border-white/5 py-3" : "bg-transparent h-20"
       )}>
-        <div className="flex items-center gap-2 group cursor-pointer" onClick={() => { setActivePage('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+        <div className="flex items-center gap-2 group cursor-pointer" onClick={() => { navigateTo('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
           <div className="w-10 h-10 bg-green-accent rounded-lg flex items-center justify-center -rotate-6 group-hover:rotate-0 transition-transform">
             <Trophy className="text-navy-dark w-6 h-6" />
           </div>
@@ -239,7 +286,7 @@ export default function App() {
           <Button variant="primary" className="py-2 text-[10px]" onClick={handleAnalysis}>GET FREE PICKS →</Button>
         </div>
 
-        <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        <button className="md:hidden text-white" onClick={toggleMenu}>
           {isMenuOpen ? <X /> : <Menu />}
         </button>
       </nav>
@@ -1018,16 +1065,31 @@ export default function App() {
               className="bg-navy-light border border-white/10 rounded-[3rem] w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl"
             >
               <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-accent/20 rounded-lg flex items-center justify-center">
-                    <Zap className="text-green-accent" size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-display text-4xl text-white italic tracking-tighter uppercase">Wogan's Live Smart Analysis</h3>
-                    <p className="text-[10px] text-green-accent/60 font-bold uppercase tracking-widest">Scanning Global Match Markets...</p>
+                <div className="flex items-center gap-6">
+                  <button 
+                    onClick={closeModal} 
+                    className="flex items-center gap-2 text-gray-500 hover:text-green-accent transition-all uppercase tracking-widest text-[10px] font-black italic"
+                  >
+                    ← PREVIOUS
+                  </button>
+                  <button 
+                    onClick={() => { closeModal(); navigateTo('home'); }} 
+                    className="flex items-center gap-2 text-gray-500 hover:text-green-accent transition-all uppercase tracking-widest text-[10px] font-black italic"
+                  >
+                    HOME
+                  </button>
+                  <div className="w-px h-8 bg-white/5 hidden sm:block" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-accent/20 rounded-lg flex items-center justify-center">
+                      <Zap className="text-green-accent" size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-display text-4xl text-white italic tracking-tighter uppercase">Wogan's Live Smart Analysis</h3>
+                      <p className="text-[10px] text-green-accent/60 font-bold uppercase tracking-widest">Scanning Global Match Markets...</p>
+                    </div>
                   </div>
                 </div>
-                <button onClick={() => { setShowAnalysisModal(false); setAnalysisResult(null); }} className="text-gray-500 hover:text-white transition-colors">
+                <button onClick={() => { closeModal(); }} className="text-gray-500 hover:text-white transition-colors">
                   <X size={24} />
                 </button>
               </div>

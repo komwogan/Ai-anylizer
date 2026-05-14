@@ -16,14 +16,21 @@ function getAI() {
 export async function getPredictions(prompt: string) {
   try {
     const ai = getAI();
+    const currentDate = new Date().toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: prompt,
       config: {
         systemInstruction: `You are an expert football analyst and tipster named 'Wogan'. 
+        Today's date is ${currentDate}. 
         The user is asking for today's predictions. 
         Create 3-4 realistic-sounding UPCOMING matches for today or tomorrow (various leagues like PL, La Liga, UCL). 
-        IMPORTANT: Only analyze future matches that haven't started yet.
+        IMPORTANT: Only analyze future matches that haven't started yet relative to ${currentDate}.
         For each match provide:
         - Matchup (Team A vs Team B)
         - League
