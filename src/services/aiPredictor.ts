@@ -1,11 +1,23 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let genAI: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!genAI) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not defined in the environment.");
+    }
+    genAI = new GoogleGenAI({ apiKey });
+  }
+  return genAI;
+}
 
 export async function getPredictions(prompt: string) {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.0-flash",
       contents: prompt,
       config: {
         systemInstruction: `You are an expert football analyst and tipster named 'Wogan'. 
@@ -21,7 +33,8 @@ export async function getPredictions(prompt: string) {
         Format your response in Markdown. Use Bold headers for match titles. Use a card-like structure for each match. Use a professional, expert tone.`,
       },
     });
-    return response.text;
+
+    return response.text || "I was unable to generate a response. Please try again later.";
   } catch (error) {
     console.error("AI Prediction Error:", error);
     return "I'm having trouble analyzing the pitches right now. Please try again in a moment!";

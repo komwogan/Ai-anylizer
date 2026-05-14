@@ -33,36 +33,36 @@
 }
 
 /* Prediction Results Markdown Styling */
-.markdown-content h1, .markdown-content h2, .markdown-content h3 {
-  @apply font-display text-2xl md:text-3xl text-white uppercase italic tracking-tighter mt-8 mb-4 border-l-4 border-green-accent pl-4;
+.markdown-content h2, .markdown-content h3 {
+  @apply font-display text-2xl md:text-3xl text-white uppercase italic tracking-tighter mt-12 mb-6 border-l-4 border-green-accent pl-5 bg-gradient-to-r from-green-accent/10 to-transparent py-2 rounded-r-lg shadow-[5px_5px_0px_rgba(0,255,135,0.05)];
 }
 
 .markdown-content p {
-  @apply text-sm text-gray-400 mb-4 leading-relaxed;
+  @apply text-sm text-gray-400 mb-5 leading-relaxed font-medium tracking-tight;
 }
 
 .markdown-content ul {
-  @apply space-y-3 mb-8;
+  @apply space-y-4 mb-10 bg-navy-light/20 p-6 rounded-2xl border border-white/5;
 }
 
 .markdown-content li {
-  @apply relative pl-8 text-sm font-medium text-gray-300;
+  @apply relative pl-10 text-sm font-bold text-gray-200 uppercase tracking-widest flex items-center;
 }
 
 .markdown-content li::before {
-  content: "→";
-  @apply absolute left-0 text-green-accent font-black;
+  content: "â–¶";
+  @apply absolute left-4 text-green-accent font-black text-[10px];
 }
 
 .markdown-content strong {
-  @apply text-green-accent font-bold;
+  @apply text-green-accent font-black italic underline decoration-green-accent/30 underline-offset-4 font-mono text-[11px];
 }
 
-/* Card-like structure for each prediction */
-.markdown-content > h3 {
-  @apply bg-navy-light/50 p-4 rounded-t-2xl border border-white/5 border-b-0 mt-10;
+/* Enhanced Card separation */
+.markdown-content h2:first-of-type, .markdown-content h3:first-of-type {
+  @apply mt-2;
 }
 
-.markdown-content > h3 + p + ul {
-  @apply bg-navy-light/30 p-6 rounded-b-2xl border border-white/5 border-t-0 mb-10;
+.markdown-content blockquote {
+  @apply border-l-2 border-green-accent/30 pl-6 italic text-gray-500 text-xs my-8 font-medium;
 }
