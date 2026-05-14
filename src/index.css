@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bebas Neue", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-navy-dark: #0A0E1A;
+  --color-green-accent: #00FF87;
+  --color-navy-light: #151B2D;
+}
+
+@layer base {
+  body {
+    @apply bg-navy-dark text-white font-sans;
+  }
+}
+
+@layer utilities {
+  .glow-green {
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.2);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s infinite ease-in-out;
+}
+
+/* Prediction Results Markdown Styling */
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+  @apply font-display text-2xl md:text-3xl text-white uppercase italic tracking-tighter mt-8 mb-4 border-l-4 border-green-accent pl-4;
+}
+
+.markdown-content p {
+  @apply text-sm text-gray-400 mb-4 leading-relaxed;
+}
+
+.markdown-content ul {
+  @apply space-y-3 mb-8;
+}
+
+.markdown-content li {
+  @apply relative pl-8 text-sm font-medium text-gray-300;
+}
+
+.markdown-content li::before {
+  content: "→";
+  @apply absolute left-0 text-green-accent font-black;
+}
+
+.markdown-content strong {
+  @apply text-green-accent font-bold;
+}
+
+/* Card-like structure for each prediction */
+.markdown-content > h3 {
+  @apply bg-navy-light/50 p-4 rounded-t-2xl border border-white/5 border-b-0 mt-10;
+}
+
+.markdown-content > h3 + p + ul {
+  @apply bg-navy-light/30 p-6 rounded-b-2xl border border-white/5 border-t-0 mb-10;
+}
