@@ -138,17 +138,57 @@ export default function App() {
 
   const [activePage, setActivePage] = useState('home');
   const [prevActivePage, setPrevActivePage] = useState('home');
+  const [comments, setComments] = useState<{name: string, text: string, time: string}[]>([]);
+  const [newComment, setNewComment] = useState({ name: '', text: '' });
+
+  useEffect(() => {
+    // Initial history state
+    window.history.replaceState({ page: 'home' }, '', '');
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.page) {
+        setActivePage(event.state.page);
+      } else {
+        setActivePage('home');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Load existing comments from localStorage if any
+    const savedComments = localStorage.getItem('wogan_comments');
+    if (savedComments) {
+      setComments(JSON.parse(savedComments));
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const navigateTo = (page: string) => {
     if (page !== activePage) {
       setPrevActivePage(activePage);
       setActivePage(page);
+      window.history.pushState({ page }, '', `#${page}`);
     }
   };
 
   const goBack = () => {
-    setActivePage(prevActivePage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.history.back();
+  };
+
+  const handleAddComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.name || !newComment.text) return;
+    
+    const comment = {
+      ...newComment,
+      time: 'Just now'
+    };
+    
+    const updatedComments = [comment, ...comments].slice(0, 10); // Keep last 10
+    setComments(updatedComments);
+    localStorage.setItem('wogan_comments', JSON.stringify(updatedComments));
+    setNewComment({ name: '', text: '' });
   };
 
   return (
@@ -580,12 +620,89 @@ export default function App() {
                       className="flex-1 bg-white/20 border border-navy-dark/10 rounded-full px-8 py-5 text-navy-dark placeholder:text-navy-dark/40 font-bold focus:outline-none focus:bg-white/30 transition-all font-mono italic"
                     />
                     <Button variant="primary" className="bg-navy-dark text-green-accent hover:bg-navy-dark/90 px-8 py-5 group">
-                      SEND ME THE TIP <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+                      SEND ME AN EMAIL FOR DAILY UPDATES <ChevronRight className="group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </form>
                   <p className="mt-8 text-navy-dark/40 text-[10px] font-black tracking-widest uppercase italic">
                     NO SPAM. NO BS. UNSUBSCRIBE ANYTIME.
                   </p>
+                </div>
+              </div>
+            </section>
+            {/* 11. COMMUNITY COMMENTS */}
+            <section className="py-24 px-6 md:px-12 lg:px-24 bg-navy-light/5">
+              <div className="max-w-4xl mx-auto">
+                <SectionTitle 
+                  title="Community Feedback" 
+                  subtitle="Hear from our winners and share your own success stories with the Wogan community."
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  {/* Comment Form */}
+                  <div className="bg-navy-light/30 border border-white/5 rounded-[2rem] p-8">
+                    <h3 className="text-xl font-bold mb-6 italic uppercase tracking-tighter">Leave a Comment</h3>
+                    <form onSubmit={handleAddComment} className="space-y-4">
+                      <div>
+                        <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest block mb-2">Display Name</label>
+                        <input 
+                          type="text" 
+                          value={newComment.name}
+                          onChange={(e) => setNewComment({...newComment, name: e.target.value})}
+                          placeholder="EX: LUCKY STRIKER" 
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-3 focus:border-green-accent transition-all italic font-bold text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest block mb-2">Your Message</label>
+                        <textarea 
+                          rows={3}
+                          value={newComment.text}
+                          onChange={(e) => setNewComment({...newComment, text: e.target.value})}
+                          placeholder="SHARE YOUR WINNING EXPERIENCE..." 
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-3 focus:border-green-accent transition-all italic font-bold text-sm"
+                        />
+                      </div>
+                      <Button className="w-full py-4 text-xs tracking-widest">PUBLISH COMMENT</Button>
+                    </form>
+                  </div>
+
+                  {/* Comment List */}
+                  <div className="space-y-6 max-h-[500px] overflow-y-auto custom-scrollbar pr-4">
+                    {comments.length === 0 ? (
+                      <div className="text-center py-12 border border-dashed border-white/10 rounded-[2rem]">
+                        <p className="text-gray-500 italic text-sm">No comments yet. Be the first to shout out!</p>
+                      </div>
+                    ) : (
+                      comments.map((comment, i) => (
+                        <motion.div 
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-white/2 border border-white/5 rounded-2xl p-6"
+                        >
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="text-green-accent font-black text-[10px] uppercase tracking-widest">{comment.name}</span>
+                            <span className="text-[8px] text-gray-600 font-black uppercase tracking-widest">{comment.time}</span>
+                          </div>
+                          <p className="text-xs text-gray-300 leading-relaxed italic">"{comment.text}"</p>
+                        </motion.div>
+                      ))
+                    )}
+                    
+                    {/* Placeholder Sample Comments if list is short */}
+                    {comments.length < 3 && [
+                      { name: "PUNTER_X", text: "Third win this week already! The AI analysis is spot on for UCL matches.", time: "2 hours ago" },
+                      { name: "GOLAZO_GUIDO", text: "Elite plan is worth every penny. The WhatsApp alerts saved me today.", time: "5 hours ago" }
+                    ].map((c, i) => (
+                      <div key={`sample-${i}`} className="bg-white/2 border border-white/5 rounded-2xl p-6 opacity-40">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-green-accent font-black text-[10px] uppercase tracking-widest">{c.name}</span>
+                          <span className="text-[8px] text-gray-600 font-black uppercase tracking-widest">{c.time}</span>
+                        </div>
+                        <p className="text-xs text-gray-300 leading-relaxed italic">"{c.text}"</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </section>
