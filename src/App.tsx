@@ -137,6 +137,19 @@ export default function App() {
   };
 
   const [activePage, setActivePage] = useState('home');
+  const [prevActivePage, setPrevActivePage] = useState('home');
+
+  const navigateTo = (page: string) => {
+    if (page !== activePage) {
+      setPrevActivePage(activePage);
+      setActivePage(page);
+    }
+  };
+
+  const goBack = () => {
+    setActivePage(prevActivePage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-navy-dark overflow-x-hidden selection:bg-green-accent selection:text-navy-dark">
@@ -154,16 +167,24 @@ export default function App() {
         </div>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+          {activePage !== 'home' && (
+            <button 
+              onClick={goBack} 
+              className="text-gray-500 hover:text-green-accent transition-colors uppercase tracking-widest text-[10px] font-black italic flex items-center gap-1"
+            >
+              ← Back
+            </button>
+          )}
           {['Home', 'Predictions', 'VIP', 'Blog', 'Contact'].map(item => (
             <button 
               key={item} 
               onClick={() => {
                 if (item === 'Predictions') {
                   handleAnalysis();
-                } else if (item === 'VIP') {
-                  setActivePage('pricing');
+                } else if (item === 'VIP' || item === 'Home') {
+                  navigateTo(item === 'VIP' ? 'pricing' : 'home');
                 } else {
-                  setActivePage(item.toLowerCase());
+                  navigateTo(item.toLowerCase());
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }} 
@@ -193,16 +214,19 @@ export default function App() {
             className="fixed inset-0 z-[100] bg-navy-dark pt-24 px-8 md:hidden"
           >
             <div className="flex flex-col gap-6 text-center">
+               {activePage !== 'home' && (
+                 <button onClick={goBack} className="text-gray-500 font-display text-2xl uppercase tracking-tighter italic">← PREVIOUS</button>
+               )}
                {['Home', 'Predictions', 'VIP', 'Blog', 'Contact'].map(item => (
                 <button 
                   key={item} 
                   onClick={() => {
                     if (item === 'Predictions') {
                       handleAnalysis();
-                    } else if (item === 'VIP') {
-                      setActivePage('pricing');
+                    } else if (item === 'VIP' || item === 'Home') {
+                      navigateTo(item === 'VIP' ? 'pricing' : 'home');
                     } else {
-                      setActivePage(item.toLowerCase());
+                      navigateTo(item.toLowerCase());
                     }
                     setIsMenuOpen(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -263,10 +287,24 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+                  className="flex flex-col items-center gap-6 mb-12"
                 >
-                  <Button className="px-10 py-5 text-lg" pulse onClick={handleAnalysis}>GET SMART ANALYSIS →</Button>
-                  <Button variant="secondary" className="px-10 py-5 text-lg" onClick={() => setActivePage('pricing')}>VIEW PLANS</Button>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
+                    <Button className="px-10 py-5 text-lg" pulse onClick={handleAnalysis}>GET SMART ANALYSIS →</Button>
+                    <Button variant="secondary" className="px-10 py-5 text-lg" onClick={() => navigateTo('pricing')}>VIEW VIP PLANS</Button>
+                  </div>
+                  
+                  {/* Payment Selection Badges */}
+                  <div className="flex items-center gap-4 py-2 px-6 bg-white/5 rounded-full border border-white/5 backdrop-blur-sm">
+                    <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest mr-2">Secure Payments:</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-bold text-white/40 italic">PayPal</span>
+                      <div className="w-px h-3 bg-white/10" />
+                      <span className="text-[10px] font-bold text-white/40 italic">Visa</span>
+                      <div className="w-px h-3 bg-white/10" />
+                      <span className="text-[10px] font-bold text-white/40 italic">Mastercard</span>
+                    </div>
+                  </div>
                 </motion.div>
 
                 <div className="flex flex-wrap items-center justify-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all">
@@ -351,6 +389,26 @@ export default function App() {
                 subtitle="Unlock the full potential of our smart analysis with a plan that fits your betting style."
               />
 
+              {/* Payment Methods Badge Area */}
+              <div className="flex justify-center -mt-12 mb-16">
+                <div className="flex items-center gap-8 py-3 px-10 bg-navy-light/50 border border-white/5 rounded-full shadow-xl">
+                  <div className="flex flex-col items-center">
+                    <span className="text-[7px] text-gray-500 font-black uppercase tracking-widest mb-1 underline decoration-green-accent/20">Verified Merchant</span>
+                    <span className="text-[10px] font-black text-white italic tracking-tighter">PAYPAL</span>
+                  </div>
+                  <div className="w-px h-6 bg-white/10" />
+                  <div className="flex flex-col items-center">
+                    <span className="text-[7px] text-gray-500 font-black uppercase tracking-widest mb-1 underline decoration-green-accent/20">Credit / Debit</span>
+                    <span className="text-[10px] font-black text-white italic tracking-tighter uppercase whitespace-nowrap">VISA & MASTERCARD</span>
+                  </div>
+                  <div className="w-px h-6 bg-white/10" />
+                  <div className="flex flex-col items-center">
+                    <span className="text-[7px] text-gray-500 font-black uppercase tracking-widest mb-1 underline decoration-green-accent/20">Encrypted</span>
+                    <span className="text-[10px] font-black text-white italic tracking-tighter">SECURE SSL</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center justify-center gap-4 mb-16">
                 <span className={cn("text-xs font-bold transition-all", !isAnnual ? "text-green-accent" : "text-gray-500")}>MONTHLY</span>
                 <button 
@@ -406,16 +464,53 @@ export default function App() {
 
                     <Button 
                       variant={item.popular ? 'primary' : 'secondary'} 
-                      className="w-full py-4 text-xs tracking-widest"
-                      onClick={() => alert(`Redirecting to checkout for ${item.name} plan...`)}
+                      className="w-full py-4 text-xs tracking-widest mb-4"
+                      onClick={() => {
+                        const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=datas2342@gmail.com&item_name=WoganPredicts%20${item.name}%20Membership&amount=${item.price}&currency_code=EUR`;
+                        window.open(paypalUrl, '_blank');
+                      }}
                     >
                       {item.cta}
                     </Button>
+
+                    <div className="flex justify-center items-center gap-2 opacity-30 grayscale mb-4">
+                      <div className="text-[8px] font-bold border border-white/40 px-1 rounded">PAYPAL</div>
+                      <div className="text-[8px] font-bold border border-white/40 px-1 rounded">VISA</div>
+                      <div className="text-[8px] font-bold border border-white/40 px-1 rounded">MC</div>
+                    </div>
                     
-                    <div className="mt-6 text-center text-[8px] text-gray-500 font-bold uppercase tracking-widest">NO COMMITMENT. CANCEL ANYTIME.</div>
+                    <div className="mt-2 text-center text-[8px] text-gray-500 font-bold uppercase tracking-widest">NO COMMITMENT. CANCEL ANYTIME.</div>
                   </motion.div>
                 ))}
               </div>
+
+              {/* Payment Methods Banner */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                className="flex flex-wrap items-center justify-center gap-8 mt-16 py-6 px-10 bg-white/2 border border-white/5 rounded-[2rem] max-w-3xl mx-auto"
+              >
+                <div className="flex flex-col items-center">
+                  <div className="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-2">Primary Hub</div>
+                  <div className="flex items-center gap-2 text-green-accent italic font-black text-[10px] border border-green-accent/20 px-4 py-2 rounded-xl bg-navy-dark shadow-[0_0_15px_rgba(0,255,135,0.05)] uppercase">
+                    PayPal Secure Express
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-white/5 hidden md:block" />
+                <div className="flex flex-col items-center">
+                  <div className="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-2">Cards Accepted</div>
+                  <div className="flex items-center gap-3 text-white/40 italic font-black text-[10px] border border-white/10 px-4 py-2 rounded-xl bg-navy-dark uppercase">
+                    Visa / Mastercard / Amex
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-white/5 hidden md:block" />
+                <div className="flex flex-col items-center">
+                  <div className="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-2">Encrypted</div>
+                  <div className="flex items-center gap-2 text-white/40 italic font-black text-[10px] border border-white/10 px-4 py-2 rounded-xl bg-navy-dark uppercase">
+                    256-Bit SSL Security
+                  </div>
+                </div>
+              </motion.div>
               
               <p className="text-center text-gray-500 max-w-lg mx-auto mt-16 text-xs italic tracking-tighter">
                 * Prices are billed monthly or annually depending on selection. Scarcity Alert: <span className="text-green-accent font-bold">Only 12 spots left for Elite members this month.</span>
@@ -500,6 +595,12 @@ export default function App() {
         {/* --- BLOG PAGE --- */}
         {activePage === 'blog' && (
           <section id="blog-page" className="py-24 px-6 md:px-12 lg:px-24 max-w-6xl mx-auto min-h-[60vh]">
+            <button 
+              onClick={goBack} 
+              className="mb-8 text-gray-500 hover:text-green-accent transition-all uppercase tracking-widest text-sm font-black italic flex items-center gap-2"
+            >
+              ← BACK TO PREVIOUS PAGE
+            </button>
             <SectionTitle title="The Wogan Journal" subtitle="Expert betting strategies, bankroll management tips, and tactical match analysis." />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
               {[
@@ -537,6 +638,12 @@ export default function App() {
         {/* --- CONTACT PAGE --- */}
         {activePage === 'contact' && (
           <section id="contact-page" className="py-24 px-6 md:px-12 lg:px-24 min-h-[60vh]">
+            <button 
+              onClick={goBack} 
+              className="mb-8 text-gray-500 hover:text-green-accent transition-all uppercase tracking-widest text-sm font-black italic flex items-center gap-2"
+            >
+              ← BACK TO PREVIOUS PAGE
+            </button>
             <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-20">
               <div className="flex-1">
                  <SectionTitle title="Get In Touch" />
@@ -550,7 +657,7 @@ export default function App() {
                       </div>
                       <div>
                         <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Email Support</div>
-                        <div className="text-xl font-bold italic tracking-tighter uppercase">support@woganpredicts.com</div>
+                        <div className="text-xl font-bold italic tracking-tighter uppercase">komwogan@gmail.com</div>
                       </div>
                    </div>
                    <div className="flex items-center gap-6">
@@ -566,7 +673,15 @@ export default function App() {
               </div>
               
               <div className="flex-1 bg-navy-light/40 border border-white/5 rounded-[3rem] p-12">
-                 <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Message sent!'); }}>
+                 <form className="space-y-6" onSubmit={(e) => { 
+                   e.preventDefault(); 
+                   const form = e.target as HTMLFormElement;
+                   const name = (form.elements[0] as HTMLInputElement).value;
+                   const subject = (form.elements[2] as HTMLSelectElement).value;
+                   const message = (form.elements[3] as HTMLTextAreaElement).value;
+                   const mailtoUrl = `mailto:komwogan@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\n\n${message}`)}`;
+                   window.location.href = mailtoUrl;
+                 }}>
                    <div className="grid grid-cols-2 gap-6">
                      <div className="space-y-2">
                        <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Full Name</label>
@@ -601,7 +716,26 @@ export default function App() {
         {activePage === 'pricing' && (
           <div className="py-12 min-h-[60vh]">
             <section id="pricing-page" className="py-24 px-6 md:px-12 lg:px-24 text-center">
+              <button 
+                onClick={goBack} 
+                className="mb-8 text-gray-500 hover:text-green-accent transition-all uppercase tracking-widest text-sm font-black italic flex items-center gap-2 mx-auto"
+              >
+                ← BACK TO PREVIOUS PAGE
+              </button>
               <SectionTitle title="Choose Your Winning Path" subtitle="Unlock the full potential of our smart analysis." />
+              
+              {/* Payment Methods Badge Area */}
+              <div className="flex justify-center -mt-12 mb-16">
+                <div className="flex items-center gap-8 py-3 px-10 bg-navy-light/50 border border-white/5 rounded-full shadow-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-accent rounded-full animate-pulse" />
+                    <span className="text-[10px] font-black text-white italic tracking-tighter">PAYPAL SECURE</span>
+                  </div>
+                  <div className="w-px h-6 bg-white/10" />
+                  <div className="text-[10px] font-black text-white italic tracking-tighter uppercase">VISA / MASTERCARD / AMEX</div>
+                </div>
+              </div>
+
               <div className="flex items-center justify-center gap-4 mb-16">
                 <span className={cn("text-xs font-bold transition-all", !isAnnual ? "text-green-accent" : "text-gray-500")}>MONTHLY</span>
                 <button className="w-14 h-7 bg-navy-light border border-white/10 rounded-full p-1 relative flex items-center transition-all cursor-pointer" onClick={() => setIsAnnual(!isAnnual)}>
@@ -609,7 +743,72 @@ export default function App() {
                 </button>
                 <span className={cn("text-xs font-bold transition-all", isAnnual ? "text-green-accent" : "text-gray-500")}>ANNUAL (SAVE 20%)</span>
               </div>
-              <Button variant="primary" className="px-12 py-5" onClick={() => setActivePage('home')}>BACK TO DASHBOARD</Button>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-end mb-16 text-left">
+                {[
+                  { name: "FREE", price: 0, desc: "Perfect for casual fans.", features: ["1 Free Prediction / Day", "Basic Match Stats"], cta: "GET FREE TIPS" },
+                  { name: "PRO", price: isAnnual ? 15 : 19, desc: "Our most popular choice.", popular: true, features: ["All Daily Predictions", "Confidence Ratings", "Discord Access"], cta: "JOIN PRO NOW" },
+                  { name: "ELITE", price: isAnnual ? 39 : 49, desc: "The ultimate edge.", features: ["All PRO Features", "VIP Only Tips", "WhatsApp Alerts"], cta: "GET ELITE ACCESS" }
+                ].map((item, idx) => (
+                  <div 
+                    key={idx}
+                    className={cn(
+                      "bg-navy-light/30 border border-white/5 rounded-3xl p-8 transition-all",
+                      item.popular && "bg-navy-light/60 border-green-accent/50 scale-105 shadow-2xl z-10"
+                    )}
+                  >
+                     <h3 className="font-display text-4xl mb-4 text-white italic">{item.name}</h3>
+                     <div className="flex items-baseline mb-8">
+                        <span className="text-xl font-bold text-white mr-1">€</span>
+                        <span className="text-5xl font-display text-white italic">{item.price}</span>
+                        <span className="text-gray-500 text-sm ml-2">/mo</span>
+                     </div>
+                     <Button 
+                      variant={item.popular ? 'primary' : 'secondary'} 
+                      className="w-full py-4 text-xs tracking-widest mb-8"
+                      onClick={() => {
+                        const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=datas2342@gmail.com&item_name=WoganPredicts%20${item.name}%20Membership&amount=${item.price}&currency_code=EUR`;
+                        window.open(paypalUrl, '_blank');
+                      }}
+                    >
+                      {item.cta}
+                    </Button>
+                    <div className="space-y-3">
+                       {item.features.map((f, i) => (
+                         <div key={i} className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                            <Check size={12} className="text-green-accent" /> {f}
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Payment Methods Section */}
+              <div className="flex flex-wrap items-center justify-center gap-8 mb-16 py-6 px-10 bg-white/2 border border-white/5 rounded-[2rem] max-w-3xl mx-auto">
+                <div className="flex flex-col items-center">
+                  <div className="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-2">Secure Method 01</div>
+                  <div className="flex items-center gap-2 text-green-accent italic font-black text-[10px] border border-green-accent/20 px-4 py-2 rounded-xl bg-navy-dark uppercase">
+                    PayPal Express
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-white/5 hidden md:block" />
+                <div className="flex flex-col items-center">
+                  <div className="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-2">Secure Method 02</div>
+                  <div className="flex items-center gap-3 text-white/40 italic font-black text-[10px] border border-white/10 px-4 py-2 rounded-xl bg-navy-dark uppercase">
+                    Visa / Mastercard
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-white/5 hidden md:block" />
+                <div className="flex flex-col items-center">
+                  <div className="text-[8px] text-gray-500 font-black uppercase tracking-widest mb-2">Secure Method 03</div>
+                  <div className="flex items-center gap-2 text-white/40 italic font-black text-[10px] border border-white/10 px-4 py-2 rounded-xl bg-navy-dark uppercase">
+                    Fast Checkout
+                  </div>
+                </div>
+              </div>
+
+              <Button variant="primary" className="px-12 py-5" onClick={() => navigateTo('home')}>BACK TO DASHBOARD</Button>
             </section>
           </div>
         )}
@@ -635,7 +834,7 @@ export default function App() {
               <a href="#" className="hover:text-green-accent transition-colors">Privacy Policy</a>
               <a href="#" className="hover:text-green-accent transition-colors">Terms of Service</a>
               <a href="#" className="hover:text-green-accent transition-colors">Affiliate Program</a>
-              <a href="#" className="hover:text-green-accent transition-colors">Contact Support</a>
+              <a href="mailto:komwogan@gmail.com" className="hover:text-green-accent transition-colors">Contact Support</a>
             </div>
           </div>
           
@@ -664,52 +863,6 @@ export default function App() {
 
       {/* --- CONVERSION OVERLAYS --- */}
 
-      {/* Sticky Mobile CTA */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full p-4 z-40 bg-gradient-to-t from-navy-dark to-transparent">
-        <Button variant="primary" className="w-full py-4 shadow-2xl shadow-green-accent/20" onClick={handleAnalysis}>
-          SEE TODAY'S PICKS →
-        </Button>
-      </div>
-
-      {/* Exit Intent Popup */}
-      <AnimatePresence>
-        {showExitPopup && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-navy-dark/90 backdrop-blur-md"
-          >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              className="bg-navy-light border border-green-accent/30 rounded-[3rem] p-12 max-w-xl w-full text-center relative"
-            >
-              <button 
-                className="absolute top-6 right-6 text-gray-500 hover:text-white"
-                onClick={() => setShowExitPopup(false)}
-              >
-                <X size={24} />
-              </button>
-              
-              <div className="w-20 h-20 bg-green-accent/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
-                <BarChart3 className="text-green-accent" size={40} />
-              </div>
-              
-              <h2 className="font-display text-5xl mb-4 text-white italic uppercase leading-none italic tracking-tighter">Wait! Don't Leave Without Your Advantage</h2>
-              <p className="text-gray-400 mb-10 font-medium italic">Join today and get a <span className="text-green-accent font-bold">25% discount</span> on your first month of Pro Access.</p>
-              
-              <div className="bg-navy-dark p-6 rounded-2xl mb-8 border border-white/5">
-                <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Offer expires in:</div>
-                <div className="font-mono text-4xl text-green-accent font-bold tabular-nums italic">00:14:59</div>
-              </div>
-              
-              <Button className="w-full py-5 text-lg" onClick={() => { setShowExitPopup(false); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>CLAIM YOUR DISCOUNT NOW →</Button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Social Proof Toast */}
       <AnimatePresence>
         {showSocialProof && (
@@ -718,7 +871,7 @@ export default function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
             className="fixed bottom-6 left-6 z-50 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl max-w-xs md:max-w-sm group cursor-pointer"
-            onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => document.getElementById('pricing-home')?.scrollIntoView({ behavior: 'smooth' })}
           >
              <div className="bg-green-accent/20 rounded-full p-2 text-green-accent group-hover:scale-110 transition-transform">
                <TrendingUp size={24} />
@@ -788,7 +941,7 @@ export default function App() {
                          </div>
                          <h4 className="font-display text-4xl mb-4 text-white italic italic tracking-tighter uppercase">Want the Full 12+ Match Slate?</h4>
                          <p className="text-gray-400 text-sm mb-8 italic">Unlock our Pro Dashboard for real-time edge, market alerts, and 85%+ high-confidence picks.</p>
-                         <Button className="w-full sm:w-auto px-12" onClick={() => { setShowAnalysisModal(false); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                         <Button className="w-full sm:w-auto px-12" onClick={() => { setShowAnalysisModal(false); document.getElementById('pricing-home')?.scrollIntoView({ behavior: 'smooth' }); }}>
                            UPGRADE TO PRO ACCESS
                          </Button>
                     </div>
@@ -799,25 +952,6 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Countdown Bar */}
-      <div className="fixed top-0 left-0 w-full z-[60] bg-green-accent py-1 px-4 text-navy-dark flex items-center justify-center gap-2 overflow-hidden sm:gap-4 h-8 md:h-10">
-        <div className="flex items-center gap-2 text-[10px] sm:text-xs font-black uppercase tracking-tighter italic">
-          <Clock size={14} />
-          <span className="hidden sm:inline">LIMITED TIME OFFER:</span> PRO PLAN 25% OFF
-        </div>
-        <div className="h-4 w-px bg-navy-dark/10" />
-        <div className="font-mono text-xs sm:text-sm font-black tabular-nums tracking-tighter italic">
-          ENDS IN {formatTime(timeLeft)}
-        </div>
-        <div className="h-4 w-px bg-navy-dark/10" />
-        <button 
-          className="text-[10px] sm:text-xs font-black decoration-navy-dark underline hover:text-navy-dark/70 transition-colors uppercase italic italic tracking-tighter"
-          onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          CLAIM NOW
-        </button>
-      </div>
 
     </div>
   );
