@@ -4,9 +4,14 @@ let genAI: GoogleGenAI | null = null;
 
 function getAI() {
   if (!genAI) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    // Check multiple possible locations for the API key
+    const apiKey = 
+      process.env.GEMINI_API_KEY || 
+      import.meta.env.VITE_GEMINI_API_KEY || 
+      "AIzaSyAthwuyi7O1GB5JOKNI0Xu2wvaID4N_GSU"; // User provided fallback
+
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not defined in the environment.");
+      throw new Error("Gemini API Key is missing. Please set GEMINI_API_KEY or VITE_GEMINI_API_KEY.");
     }
     genAI = new GoogleGenAI({ apiKey });
   }
