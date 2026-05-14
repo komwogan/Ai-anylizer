@@ -1066,19 +1066,6 @@ export default function App() {
             >
               <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/2">
                 <div className="flex items-center gap-6">
-                  <button 
-                    onClick={closeModal} 
-                    className="flex items-center gap-2 text-gray-500 hover:text-green-accent transition-all uppercase tracking-widest text-[10px] font-black italic"
-                  >
-                    ← PREVIOUS
-                  </button>
-                  <button 
-                    onClick={() => { closeModal(); navigateTo('home'); }} 
-                    className="flex items-center gap-2 text-gray-500 hover:text-green-accent transition-all uppercase tracking-widest text-[10px] font-black italic"
-                  >
-                    HOME
-                  </button>
-                  <div className="w-px h-8 bg-white/5 hidden sm:block" />
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-green-accent/20 rounded-lg flex items-center justify-center">
                       <Zap className="text-green-accent" size={20} />
