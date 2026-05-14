@@ -23,13 +23,14 @@ export async function getPredictions(prompt: string) {
     });
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
+        tools: [{ googleSearch: {} }],
         systemInstruction: `You are an expert football analyst and tipster named 'Wogan'. 
         Today's date is ${currentDate}. 
         The user is asking for today's predictions. 
-        Create 3-4 realistic-sounding UPCOMING matches for today or tomorrow (various leagues like PL, La Liga, UCL). 
+        Use Google Search to find real, UPCOMING football matches for today or tomorrow (various leagues like PL, La Liga, UCL, etc.). 
         IMPORTANT: Only analyze future matches that haven't started yet relative to ${currentDate}.
         For each match provide:
         - Matchup (Team A vs Team B)
