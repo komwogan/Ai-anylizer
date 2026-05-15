@@ -5,10 +5,15 @@ let genAI: GoogleGenAI | null = null;
 function getAI() {
   if (!genAI) {
     // Check multiple possible locations for the API key
-    const apiKey = 
-      process.env.GEMINI_API_KEY || 
-      import.meta.env.VITE_GEMINI_API_KEY || 
-      "AIzaSyAthwuyi7O1GB5JOKNI0Xu2wvaID4N_GSU"; // User provided fallback
+    const envKey = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined;
+    const viteKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const fallbackKey = "AIzaSyAthwuyi7O1GB5JOKNI0Xu2wvaID4N_GSU";
+
+    const apiKey = envKey || viteKey || fallbackKey;
+
+    if (envKey) console.log("AI: Using GEMINI_API_KEY from process.env");
+    else if (viteKey) console.log("AI: Using VITE_GEMINI_API_KEY from import.meta.env");
+    else console.log("AI: Using fallback hardcoded API key");
 
     if (!apiKey) {
       throw new Error("Gemini API Key is missing. Please set GEMINI_API_KEY or VITE_GEMINI_API_KEY.");
@@ -47,9 +52,23 @@ export async function getPredictions(prompt: string) {
       },
     });
 
-    return response.text || "I was unable to generate a response. Please try again later.";
-  } catch (error) {
-    console.error("AI Prediction Error:", error);
-    return "I'm having trouble analyzing the pitches right now. Please try again in a moment!";
+    if (!response.text) {
+      console.warn("AI returned an empty response. Response object:", response);
+      return "I couldn't find any upcoming matches to analyze right now. Please try again in 10 minutes!";
+    }
+
+    return response.text;
+  } catch (error: any) {
+    console.error("AI Prediction Error Details:", error);
+    
+    // Help the user see common errors in the console
+    if (error?.message?.includes("API_KEY_INVALID")) {
+      return "Error: The API Key provided is invalid. Please check your Secrets in Settings.";
+    }
+    if (error?.message?.includes("PERMISSION_DENIED")) {
+      return "Error: API Key permission denied. Please ensure the key has Gemini API access enabled.";
+    }
+    
+    return "I'm having trouble analyzing the pitches right now. Please check the browser console for details or try again in a moment!";
   }
 }
