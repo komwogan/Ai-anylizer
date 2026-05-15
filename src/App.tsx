@@ -1072,7 +1072,7 @@ export default function App() {
                     </div>
                     <div>
                       <h3 className="font-display text-4xl text-white italic tracking-tighter uppercase">Wogan's Live Smart Analysis</h3>
-                      <p className="text-[10px] text-green-accent/60 font-bold uppercase tracking-widest">Scanning Global Match Markets...</p>
+                      <p className="text-[10px] text-green-accent/60 font-bold uppercase tracking-widest">Scanning Global Match Markets • <span className="text-white/80">Context7 Active</span></p>
                     </div>
                   </div>
                 </div>
@@ -1086,7 +1086,7 @@ export default function App() {
                   <div className="flex flex-col items-center justify-center py-20 text-center">
                     <Loader2 className="text-green-accent animate-spin mb-6" size={48} />
                     <h4 className="text-2xl font-bold mb-2 uppercase italic italic tracking-tighter">Analyzing Pitches...</h4>
-                    <p className="text-gray-400 text-sm max-w-xs uppercase font-bold tracking-widest leading-loose">Wogan's Engine is processing team line-ups, xG data, and injury reports across all major leagues.</p>
+                    <p className="text-gray-400 text-sm max-w-xs uppercase font-bold tracking-widest leading-loose">Wogan's Context7 Engine is processing team line-ups, xG data, and injury reports across all major leagues.</p>
                   </div>
                 ) : analysisResult ? (
                   <div className="max-w-none">
