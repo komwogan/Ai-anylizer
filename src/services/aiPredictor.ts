@@ -36,9 +36,9 @@ export async function getPredictions(prompt: string) {
       year: 'numeric' 
     });
 
-    // Use Gemini 1.5 Flash - it's much faster and has a higher quota for free keys
+    // Use Gemini 2.0 Flash - better search support and reliability
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
@@ -75,7 +75,7 @@ export async function getPredictions(prompt: string) {
       try {
         const ai = getAI();
         const fallback = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-2.0-flash",
           contents: prompt + " (Please provide 3 football tips for today)",
         });
         return fallback.text || "Wogan is resting. Try again in 1 minute.";
