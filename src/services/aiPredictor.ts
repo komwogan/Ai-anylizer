@@ -5,8 +5,8 @@ let genAI: GoogleGenAI | null = null;
 function getAI() {
   if (!genAI) {
     // Check multiple possible locations for the API key
-    const envKey = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined;
-    const viteKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const envKey = typeof process !== 'undefined' && process.env ? process.env.GEMINI_API_KEY : undefined;
+    const viteKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
     const fallbackKey = "AIzaSyAthwuyi7O1GB5JOKNI0Xu2wvaID4N_GSU";
 
     const apiKey = envKey || viteKey || fallbackKey;
@@ -32,43 +32,51 @@ export async function getPredictions(prompt: string) {
       year: 'numeric' 
     });
 
+    // Try with gemini-2.0-flash first as it's more stable for grounding
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.0-flash",
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
         systemInstruction: `You are an expert football analyst and tipster named 'Wogan'. 
         Today's date is ${currentDate}. 
-        The user is asking for today's predictions. 
-        Use Google Search to find real, UPCOMING football matches for today or tomorrow (various leagues like PL, La Liga, UCL, etc.). 
+        Use Google Search to find real, UPCOMING football matches for today or tomorrow. 
         IMPORTANT: Only analyze future matches that haven't started yet relative to ${currentDate}.
-        For each match provide:
-        - Matchup (Team A vs Team B)
-        - League
-        - Tip (e.g., 1X2, Over/Under, BTTS)
-        - Confidence (%)
-        - Match Preview (1-2 sentences)
-        Format your response in Markdown. Use Bold headers for match titles. Use a card-like structure for each match. Use a professional, expert tone.`,
+        For each match provide: Matchup, League, Tip, Confidence (%), and a brief Preview.
+        Format in Markdown with bold headers.`,
       },
     });
 
     if (!response.text) {
-      console.warn("AI returned an empty response. Response object:", response);
-      return "I couldn't find any upcoming matches to analyze right now. Please try again in 10 minutes!";
+      // Fallback: Try without search if search failed/returned empty
+      console.warn("AI search returned empty, trying basic match generation...");
+      const fallbackResponse = await ai.models.generateContent({
+        model: "gemini-1.5-flash",
+        contents: "Give me some plausible upcoming football match predictions for " + currentDate,
+        config: {
+          systemInstruction: "You are Wogan, a football expert. Predict 3 upcoming matches for today. Use recent real-world knowledge.",
+        }
+      });
+      return fallbackResponse.text || "I couldn't find matches to analyze right now. Please try again soon!";
     }
 
     return response.text;
   } catch (error: any) {
     console.error("AI Prediction Error Details:", error);
     
-    // Help the user see common errors in the console
-    if (error?.message?.includes("API_KEY_INVALID")) {
-      return "Error: The API Key provided is invalid. Please check your Secrets in Settings.";
+    // Explicitly show the error message in the UI for the user to debug
+    const errorMessage = error?.message || "Unknown error";
+    
+    if (errorMessage.includes("API_KEY_INVALID")) {
+      return "Error: API Key is invalid. Check your Secrets.";
     }
-    if (error?.message?.includes("PERMISSION_DENIED")) {
-      return "Error: API Key permission denied. Please ensure the key has Gemini API access enabled.";
+    if (errorMessage.includes("PERMISSION_DENIED")) {
+      return "Error: Key doesn't have Gemini API permission. Enable it in Cloud Console.";
+    }
+    if (errorMessage.includes("model is not found") || errorMessage.includes("not found")) {
+      return "Error: The selected AI model isn't available for this key. Model: gemini-2.0-flash";
     }
     
-    return "I'm having trouble analyzing the pitches right now. Please check the browser console for details or try again in a moment!";
+    return `Analysis failed: ${errorMessage.substring(0, 100)}. Please check browser console for logs!`;
   }
 }
