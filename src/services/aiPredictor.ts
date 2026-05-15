@@ -67,16 +67,19 @@ export async function getPredictions(prompt: string) {
     // Explicitly show the error message in the UI for the user to debug
     const errorMessage = error?.message || "Unknown error";
     
+    if (errorMessage.includes("429") || errorMessage.toLowerCase().includes("quota")) {
+      return "Wogan is currently overloaded with requests! (API Quota Exceeded). Please wait 60 seconds and try again.";
+    }
     if (errorMessage.includes("API_KEY_INVALID")) {
-      return "Error: API Key is invalid. Check your Secrets.";
+      return "Error: API Key is invalid. Please check your configuration.";
     }
     if (errorMessage.includes("PERMISSION_DENIED")) {
-      return "Error: Key doesn't have Gemini API permission. Enable it in Cloud Console.";
+      return "Error: API Key does not have permission for Gemini. Enable it in Google Cloud Console.";
     }
-    if (errorMessage.includes("model is not found") || errorMessage.includes("not found")) {
-      return "Error: The selected AI model isn't available for this key. Model: gemini-2.0-flash";
+    if (errorMessage.includes("model is not found")) {
+      return "Error: AI Model 'gemini-2.0-flash' not supported by this key.";
     }
     
-    return `Analysis failed: ${errorMessage.substring(0, 100)}. Please check browser console for logs!`;
+    return `Analysis failed: ${errorMessage.substring(0, 100)}.`;
   }
 }
